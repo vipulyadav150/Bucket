@@ -1,6 +1,7 @@
 from django.shortcuts import render , get_object_or_404
 from django.views.generic import ListView , DetailView
 from .models import Product
+from django.http import Http404
 # Class Based List View
 class ProductListView(ListView):
     queryset = Product.objects.all()
@@ -39,12 +40,37 @@ class ProductDetailView(DetailView):
 
 def product_detail_view(r,pk=None,*args,**kwargs):
     # instance = Product.objects.get(pk=pk)
-    instance = get_object_or_404(Product,pk=pk)
     # print(instance)
     # print(args)
     # print(kwargs)
     # print(pk)
+    # instance = get_object_or_404(Product,pk=pk)
+                #or
+    # try:
+    #     instance = Product.objects.get(id=pk)
+    # except Product.DoesNotExist:
+    #     print('No Product Here!')
+    #     raise Http404('OOPS! No Products Present Here')
+    # except:
+    #     print('Huh!')
+
+            #or
+    qs = Product.objects.filter(id=pk)
+    #The below queryset will fetch the list containing the product ..
+    #Since the product is only one the list will have only one item
+    #So qs.first() is tom assign the item as an insatnce ..similar to qs[0]
+
+    if qs.exists() and qs.count()==1:
+        instance = qs.first()
+    else:
+        raise Http404('OOPS! Sorry No Product Here!')
+
     context = {
         'object':instance
     }
+
+
+
+
+
     return render(r, 'products/details.html', context)
